@@ -71,6 +71,9 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
@@ -147,7 +150,7 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
     Tenant tenant = new Tenant(_role, _name, _instanceCount, _offlineInstanceCount, _realtimeInstanceCount);
     String res = AbstractBaseAdminCommand
         .sendRequest("POST", ControllerRequestURLBuilder.baseUrl(_controllerAddress).forTenantCreate(),
-            tenant.toJsonString(), makeAuthHeader(makeAuthToken(_authToken, _user, _password)));
+            tenant.toJsonString(), makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
 
     LOGGER.info(res);
     System.out.print(res);

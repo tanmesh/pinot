@@ -37,6 +37,7 @@ public class TableDataManagerConfig {
   private static final String TABLE_DATA_MANAGER_NAME = "name";
   private static final String TABLE_IS_DIMENSION = "isDimTable";
   private static final String TABLE_DATA_MANGER_AUTH_TOKEN = "authToken";
+  private static final String TABLE_DATA_MANGER_AUTH_TOKEN_URL = "authTokenUrl";
 
   private final Configuration _tableDataManagerConfig;
 
@@ -72,6 +73,10 @@ public class TableDataManagerConfig {
     return _tableDataManagerConfig.getString(TABLE_DATA_MANGER_AUTH_TOKEN);
   }
 
+  public String getAuthTokenUrl() {
+    return _tableDataManagerConfig.getString(TABLE_DATA_MANGER_AUTH_TOKEN_URL);
+  }
+
   public static TableDataManagerConfig getDefaultHelixTableDataManagerConfig(
       InstanceDataManagerConfig instanceDataManagerConfig, String tableNameWithType) {
     Configuration defaultConfig = new PropertiesConfiguration();
@@ -83,6 +88,7 @@ public class TableDataManagerConfig {
     Preconditions.checkNotNull(tableType);
     defaultConfig.addProperty(TABLE_DATA_MANAGER_TYPE, tableType.name());
     defaultConfig.addProperty(TABLE_DATA_MANGER_AUTH_TOKEN, instanceDataManagerConfig.getAuthToken());
+    defaultConfig.addProperty(TABLE_DATA_MANGER_AUTH_TOKEN_URL, instanceDataManagerConfig.getAuthTokenUrl());
 
     return new TableDataManagerConfig(defaultConfig);
   }

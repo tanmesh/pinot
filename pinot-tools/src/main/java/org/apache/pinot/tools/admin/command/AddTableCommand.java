@@ -72,6 +72,9 @@ public class AddTableCommand extends AbstractBaseAdminCommand implements Command
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
@@ -146,6 +149,11 @@ public class AddTableCommand extends AbstractBaseAdminCommand implements Command
     return this;
   }
 
+  public AddTableCommand setAuthTokenUrl(String authTokenUrl) {
+    _authTokenUrl = _authTokenUrl;
+    return this;
+  }
+
   public AddTableCommand setExecute(boolean exec) {
     _exec = exec;
     return this;
@@ -165,7 +173,8 @@ public class AddTableCommand extends AbstractBaseAdminCommand implements Command
     try (FileUploadDownloadClient fileUploadDownloadClient = new FileUploadDownloadClient()) {
       fileUploadDownloadClient.addSchema(FileUploadDownloadClient
               .getUploadSchemaURI(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort)),
-          schema.getSchemaName(), schemaFile, makeAuthHeader(makeAuthToken(_authToken, _user, _password)),
+          schema.getSchemaName(), schemaFile, makeAuthHeaders(makeAuthToken(_authToken, _user, _password),
+              _authTokenUrl),
           Collections.emptyList());
     } catch (Exception e) {
       LOGGER.error("Got Exception to upload Pinot Schema: " + schema.getSchemaName(), e);
@@ -177,7 +186,7 @@ public class AddTableCommand extends AbstractBaseAdminCommand implements Command
       throws IOException {
     String res = AbstractBaseAdminCommand
         .sendRequest("POST", ControllerRequestURLBuilder.baseUrl(_controllerAddress).forTableCreate(), node.toString(),
-            makeAuthHeader(makeAuthToken(_authToken, _user, _password)));
+            makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
     LOGGER.info(res);
     return res.contains("succesfully added");
   }

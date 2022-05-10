@@ -59,6 +59,9 @@ public class AddSchemaCommand extends AbstractBaseAdminCommand implements Comman
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
@@ -151,7 +154,8 @@ public class AddSchemaCommand extends AbstractBaseAdminCommand implements Comman
     try (FileUploadDownloadClient fileUploadDownloadClient = new FileUploadDownloadClient()) {
       fileUploadDownloadClient.addSchema(FileUploadDownloadClient
               .getUploadSchemaURI(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort)),
-          schema.getSchemaName(), schemaFile, makeAuthHeader(makeAuthToken(_authToken, _user, _password)),
+          schema.getSchemaName(), schemaFile, makeAuthHeaders(makeAuthToken(_authToken, _user, _password),
+              _authTokenUrl),
           Collections.emptyList());
     } catch (Exception e) {
       LOGGER.error("Got Exception to upload Pinot Schema: " + schema.getSchemaName(), e);

@@ -34,6 +34,7 @@ public class CommonConstants {
   public static final String HTTPS_PROTOCOL = "https";
 
   public static final String KEY_OF_AUTH_TOKEN = "auth.token";
+  public static final String KEY_OF_AUTH_TOKEN_URL = "auth.token.url";
 
   public static final String TABLE_NAME = "tableName";
 
@@ -438,6 +439,7 @@ public class CommonConstants {
        * E.g. null (auth disabled), "Basic abcdef..." (basic auth), "Bearer 123def..." (oauth2)
        */
       public static final String CONFIG_OF_SEGMENT_UPLOADER_AUTH_TOKEN = KEY_OF_AUTH_TOKEN;
+      public static final String CONFIG_OF_SEGMENT_UPLOADER_AUTH_TOKEN_URL = KEY_OF_AUTH_TOKEN_URL;
 
       public static final int DEFAULT_SEGMENT_UPLOAD_REQUEST_TIMEOUT_MS = 300_000;
       public static final int DEFAULT_OTHER_REQUESTS_TIMEOUT = 10_000;

@@ -87,6 +87,9 @@ public class BootstrapTableCommand extends AbstractBaseAdminCommand implements C
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
@@ -128,7 +131,8 @@ public class BootstrapTableCommand extends AbstractBaseAdminCommand implements C
       _controllerHost = NetUtils.getHostAddress();
     }
     String token = makeAuthToken(_authToken, _user, _password);
-    return new BootstrapTableTool(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort), _dir, token)
+    return new BootstrapTableTool(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort), _dir, token,
+        _authTokenUrl)
         .execute();
   }
 }

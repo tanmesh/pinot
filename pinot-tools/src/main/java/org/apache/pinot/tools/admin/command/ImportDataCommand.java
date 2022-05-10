@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.spi.data.readers.FileFormat;
 import org.apache.pinot.spi.filesystem.PinotFSFactory;
 import org.apache.pinot.spi.ingestion.batch.BatchConfigProperties;
@@ -84,6 +85,9 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
 
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
+
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
 
   @CommandLine.Option(names = {"-tempDir"},
       description = "Temporary directory used to hold data during segment creation.")
@@ -145,6 +149,11 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
 
   public ImportDataCommand setAuthToken(String authToken) {
     _authToken = authToken;
+    return this;
+  }
+
+  public ImportDataCommand setAuthTokenUrl(String authTokenUrl) {
+    _authTokenUrl = authTokenUrl;
     return this;
   }
 
@@ -253,7 +262,7 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
     spec.setCleanUpOutputDir(true);
     spec.setOverwriteOutput(true);
     spec.setJobType("SegmentCreationAndTarPush");
-    spec.setAuthToken(makeAuthToken(_authToken, _user, _password));
+    spec.setAuthToken(AuthProviderUtils.resolveToToken(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
 
     // set ExecutionFrameworkSpec
     ExecutionFrameworkSpec executionFrameworkSpec = new ExecutionFrameworkSpec();

@@ -21,7 +21,6 @@ package org.apache.pinot.tools.admin.command;
 import java.net.URI;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pinot.spi.utils.CommonConstants;
 import org.apache.pinot.spi.utils.NetUtils;
 import org.apache.pinot.tools.Command;
@@ -58,6 +57,9 @@ public class ChangeTableState extends AbstractBaseAdminCommand implements Comman
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
@@ -81,9 +83,9 @@ public class ChangeTableState extends AbstractBaseAdminCommand implements Comman
     String token = makeAuthToken(_authToken, _user, _password);
 
     GetMethod httpGet = new GetMethod(uri.toString());
-    if (StringUtils.isNotBlank(token)) {
-      httpGet.setRequestHeader("Authorization", token);
-    }
+    makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl)
+        .forEach(header -> httpGet.addRequestHeader(header.getName(), header.getValue()));
+
     int status = httpClient.executeMethod(httpGet);
     if (status != 200) {
       throw new RuntimeException("Failed to change table state, error: " + httpGet.getResponseBodyAsString());

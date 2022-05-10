@@ -55,6 +55,8 @@ public interface InstanceDataManagerConfig {
 
   String getAuthToken();
 
+  String getAuthTokenUrl();
+
   String getSegmentDirectoryLoader();
 
   long getErrorCacheSize();

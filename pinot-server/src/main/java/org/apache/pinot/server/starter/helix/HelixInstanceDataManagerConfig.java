@@ -64,6 +64,8 @@ public class HelixInstanceDataManagerConfig implements InstanceDataManagerConfig
   public static final String INSTANCE_RELOAD_CONSUMING_SEGMENT = "reload.consumingSegment";
   // Key of the auth token
   public static final String AUTH_TOKEN = "auth.token";
+  // Key of the auth token url
+  public static final String AUTH_TOKEN_URL = "auth.token.url";
   // Key of segment directory loader
   public static final String SEGMENT_DIRECTORY_LOADER = "segment.directory.loader";
 
@@ -214,6 +216,11 @@ public class HelixInstanceDataManagerConfig implements InstanceDataManagerConfig
   @Override
   public String getAuthToken() {
     return _instanceDataManagerConfiguration.getProperty(AUTH_TOKEN);
+  }
+
+  @Override
+  public String getAuthTokenUrl() {
+    return _instanceDataManagerConfiguration.getProperty(AUTH_TOKEN_URL);
   }
 
   @Override

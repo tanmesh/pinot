@@ -54,6 +54,9 @@ public class PostQueryCommand extends AbstractBaseAdminCommand implements Comman
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true, description = "Print "
       + "this message.")
   private boolean _help = false;
@@ -113,6 +116,11 @@ public class PostQueryCommand extends AbstractBaseAdminCommand implements Comman
     return this;
   }
 
+  public PostQueryCommand setAuthTokenUrl(String authTokenUrl) {
+    _authTokenUrl = authTokenUrl;
+    return this;
+  }
+
   public PostQueryCommand setQuery(String query) {
     _query = query;
     return this;
@@ -126,7 +134,8 @@ public class PostQueryCommand extends AbstractBaseAdminCommand implements Comman
     LOGGER.info("Executing command: " + this);
     String url = _brokerProtocol + "://" + _brokerHost + ":" + _brokerPort + "/query/sql";
     String request = JsonUtils.objectToString(Collections.singletonMap(Request.SQL, _query));
-    return sendRequest("POST", url, request, makeAuthHeader(makeAuthToken(_authToken, _user, _password)));
+    return sendRequest("POST", url, request, makeAuthHeaders(makeAuthToken(_authToken, _user, _password),
+        _authTokenUrl));
   }
 
   @Override

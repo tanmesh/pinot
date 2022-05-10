@@ -158,7 +158,8 @@ public class BasicAuthBatchIntegrationTest extends ClusterTest {
     IOUtils
         .write(jobFileContents.replaceAll("9000", String.valueOf(getControllerPort())), new FileOutputStream(jobFile));
 
-    new BootstrapTableTool("http", "localhost", getControllerPort(), baseDir.getAbsolutePath(), AUTH_TOKEN).execute();
+    new BootstrapTableTool("http", "localhost", getControllerPort(), baseDir.getAbsolutePath(),
+        AUTH_TOKEN, null).execute();
 
     Thread.sleep(5000);
 

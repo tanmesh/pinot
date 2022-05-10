@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.utils.FileUploadDownloadClient;
 import org.apache.pinot.common.utils.TarGzCompressionUtils;
 import org.apache.pinot.common.utils.http.HttpClient;
@@ -62,6 +63,9 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
 
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
+
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
 
   @CommandLine.Option(names = {"-segmentDir"}, required = true, description = "Path to segment directory.")
   private String _segmentDir = null;
@@ -129,6 +133,11 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
     return this;
   }
 
+  public UploadSegmentCommand setAuthTokenUrl(String authTokenUrl) {
+    _authTokenUrl = authTokenUrl;
+    return this;
+  }
+
   public UploadSegmentCommand setSegmentDir(String segmentDir) {
     _segmentDir = segmentDir;
     return this;
@@ -168,8 +177,9 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
 
         LOGGER.info("Uploading segment tar file: {}", segmentTarFile);
         fileUploadDownloadClient.uploadSegment(uploadSegmentHttpURI, segmentTarFile.getName(), segmentTarFile,
-            makeAuthHeader(makeAuthToken(_authToken, _user, _password)), Collections
-                .singletonList(new BasicNameValuePair(FileUploadDownloadClient.QueryParameters.TABLE_NAME, _tableName)),
+            AuthProviderUtils.toHeaders(AuthProviderUtils.inferProvider(makeAuthToken(_authToken, _user, _password),
+                _authTokenUrl)), Collections.singletonList(new BasicNameValuePair(
+                    FileUploadDownloadClient.QueryParameters.TABLE_NAME, _tableName)),
             HttpClient.DEFAULT_SOCKET_TIMEOUT_MS);
       }
     } finally {

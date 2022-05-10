@@ -55,6 +55,9 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
   @CommandLine.Option(names = {"-authToken"}, required = false, description = "Http auth token.")
   private String _authToken;
 
+  @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
+  private String _authTokenUrl;
+
   @CommandLine.Option(names = {"-config"}, description = "Cluster config to operate.")
   private String _config;
 
@@ -148,7 +151,7 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
     }
     String clusterConfigUrl =
         _controllerProtocol + "://" + _controllerHost + ":" + _controllerPort + "/cluster/configs";
-    List<Header> headers = makeAuthHeader(makeAuthToken(_authToken, _user, _password));
+    List<Header> headers = makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl);
     switch (_operation.toUpperCase()) {
       case "ADD":
       case "UPDATE":

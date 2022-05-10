@@ -39,6 +39,7 @@ public class SegmentFetcherFactory {
   static final String SEGMENT_FETCHER_CLASS_KEY_SUFFIX = ".class";
   private static final String PROTOCOLS_KEY = "protocols";
   private static final String AUTH_TOKEN_KEY = CommonConstants.KEY_OF_AUTH_TOKEN;
+  private static final String AUTH_TOKEN_URL_KEY = CommonConstants.KEY_OF_AUTH_TOKEN_URL;
   private static final String ENCODED_SUFFIX = ".enc";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SegmentFetcherFactory.class);
@@ -91,9 +92,14 @@ public class SegmentFetcherFactory {
       }
 
       String authToken = config.getProperty(AUTH_TOKEN_KEY);
+      String authTokenUrl = config.getProperty(AUTH_TOKEN_URL_KEY);
+
       Map<String, Object> subConfigMap = config.subset(protocol).toMap();
       if (!subConfigMap.containsKey(AUTH_TOKEN_KEY) && StringUtils.isNotBlank(authToken)) {
         subConfigMap.put(AUTH_TOKEN_KEY, authToken);
+      }
+      if (!subConfigMap.containsKey(AUTH_TOKEN_URL_KEY) && StringUtils.isNotBlank(authTokenUrl)) {
+        subConfigMap.put(AUTH_TOKEN_URL_KEY, authTokenUrl);
       }
 
       segmentFetcher.init(new PinotConfiguration(subConfigMap));
