@@ -271,7 +271,7 @@ public final class IngestionUtils {
     spec.setPushJobSpec(pushJobSpec);
     spec.setTableSpec(tableSpec);
     spec.setPinotClusterSpecs(pinotClusterSpecs);
-    spec.setAuthToken(AuthProviderUtils.toTaskToken(authProvider));
+    spec.setAuthToken(AuthProviderUtils.toStaticToken(authProvider));
 
     return spec;
   }

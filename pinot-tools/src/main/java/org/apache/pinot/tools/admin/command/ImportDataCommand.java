@@ -149,16 +149,6 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
     return this;
   }
 
-  public ImportDataCommand setAuthToken(String authToken) {
-    _authToken = authToken;
-    return this;
-  }
-
-  public ImportDataCommand setAuthTokenUrl(String authTokenUrl) {
-    _authTokenUrl = authTokenUrl;
-    return this;
-  }
-
   public ImportDataCommand setAuthProvider(AuthProvider authProvider) {
     _authProvider = authProvider;
     return this;

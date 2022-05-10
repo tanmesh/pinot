@@ -937,7 +937,7 @@ public class FileUploadDownloadClient implements AutoCloseable {
   /**
    * Deprecated due to lack of auth header support. May break for deployments with auth enabled
    *
-   * Download a file using default settings, with an optional auth token
+   * Download a file using default settings
    *
    * @see HttpClient#downloadFile(URI, int, File, AuthProvider, List)
    *

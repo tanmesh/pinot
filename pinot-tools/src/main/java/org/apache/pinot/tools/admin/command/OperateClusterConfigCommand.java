@@ -128,11 +128,6 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
     return this;
   }
 
-  public OperateClusterConfigCommand setAuthToken(String authToken) {
-    _authToken = authToken;
-    return this;
-  }
-
   public OperateClusterConfigCommand setConfig(String config) {
     _config = config;
     return this;

@@ -147,23 +147,13 @@ public class AddTableCommand extends AbstractBaseAdminCommand implements Command
     return this;
   }
 
-  public AddTableCommand setAuthToken(String authToken) {
-    _authToken = authToken;
-    return this;
-  }
-
-  public AddTableCommand setAuthTokenUrl(String authTokenUrl) {
-    _authTokenUrl = _authTokenUrl;
-    return this;
-  }
-
   public AddTableCommand setExecute(boolean exec) {
     _exec = exec;
     return this;
   }
 
   public AddTableCommand setAuthProvider(AuthProvider authProvider) {
-    _authProvider = _authProvider;
+    _authProvider = authProvider;
     return this;
   }
 

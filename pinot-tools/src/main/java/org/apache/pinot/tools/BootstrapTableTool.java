@@ -182,7 +182,7 @@ public class BootstrapTableTool {
           }
 
           // url-based token needs to be resolved before job run
-          spec.setAuthToken(AuthProviderUtils.toTaskToken(_authProvider));
+          spec.setAuthToken(AuthProviderUtils.toStaticToken(_authProvider));
 
           IngestionJobLauncher.runIngestionJob(spec);
         }

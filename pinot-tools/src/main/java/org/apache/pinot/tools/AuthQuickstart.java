@@ -36,7 +36,7 @@ public class AuthQuickstart extends Quickstart {
 
   @Override
   public AuthProvider getAuthProvider() {
-    return AuthProviderUtils.makeProvider(BasicAuthUtils.toBasicAuthToken("admin", "verysecret"));
+    return AuthProviderUtils.makeStaticProvider(BasicAuthUtils.toBasicAuthToken("admin", "verysecret"));
   }
 
   @Override

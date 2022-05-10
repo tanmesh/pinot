@@ -130,16 +130,6 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
     return this;
   }
 
-  public UploadSegmentCommand setAuthToken(String authToken) {
-    _authToken = authToken;
-    return this;
-  }
-
-  public UploadSegmentCommand setAuthTokenUrl(String authTokenUrl) {
-    _authTokenUrl = authTokenUrl;
-    return this;
-  }
-
   public UploadSegmentCommand setSegmentDir(String segmentDir) {
     _segmentDir = segmentDir;
     return this;

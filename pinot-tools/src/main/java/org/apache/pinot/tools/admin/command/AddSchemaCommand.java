@@ -125,10 +125,6 @@ public class AddSchemaCommand extends AbstractBaseAdminCommand implements Comman
     _password = password;
   }
 
-  public void setAuthToken(String authToken) {
-    _authToken = authToken;
-  }
-
   public void setAuthProvider(AuthProvider authProvider) {
     _authProvider = authProvider;
   }

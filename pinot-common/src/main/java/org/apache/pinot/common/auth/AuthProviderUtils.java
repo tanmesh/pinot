@@ -60,16 +60,16 @@ public final class AuthProviderUtils {
    * @return auth provider
    */
   public static AuthProvider extractAuthProvider(PinotConfiguration pinotConfig, String namespace) {
-    return makeProvider(extractAuthConfig(pinotConfig, namespace));
+    return makeDynamicProvider(extractAuthConfig(pinotConfig, namespace));
   }
 
   /**
-   * Create auth provider based on the availability of a static token only, if any.
+   * Create auth provider based on the availability of a static token only, if any. This typically applies to task specs
    *
    * @param authToken static auth token
    * @return auth provider
    */
-  public static AuthProvider makeProvider(String authToken) {
+  public static AuthProvider makeStaticProvider(String authToken) {
     if (StringUtils.isBlank(authToken)) {
       return new NullAuthProvider();
     }
@@ -83,7 +83,7 @@ public final class AuthProviderUtils {
    * @param authConfig auth config
    * @return auth provider
    */
-  public static AuthProvider makeProvider(AuthConfig authConfig) {
+  public static AuthProvider makeDynamicProvider(AuthConfig authConfig) {
     if (authConfig == null) {
       return new NullAuthProvider();
     }
@@ -99,8 +99,13 @@ public final class AuthProviderUtils {
       }
     }
 
+    // mimic legacy behavior for "auth.token" property
     if (authConfig.getProperties().containsKey(StaticTokenAuthProvider.TOKEN)) {
       return new StaticTokenAuthProvider(authConfig);
+    }
+
+    if (!authConfig.getProperties().isEmpty()) {
+      throw new IllegalArgumentException("Some auth properties defined, but no provider created. Aborting.");
     }
 
     return new NullAuthProvider();
@@ -136,7 +141,7 @@ public final class AuthProviderUtils {
    * @param authProvider auth provider
    * @return static token
    */
-  public static String toTaskToken(@Nullable AuthProvider authProvider) {
+  public static String toStaticToken(@Nullable AuthProvider authProvider) {
     if (authProvider == null) {
       return null;
     }

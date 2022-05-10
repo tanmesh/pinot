@@ -32,6 +32,7 @@ import org.apache.pinot.client.Connection;
 import org.apache.pinot.client.ConnectionFactory;
 import org.apache.pinot.client.JsonAsyncHttpPinotClientTransportFactory;
 import org.apache.pinot.client.ResultSetGroup;
+import org.apache.pinot.common.auth.UrlAuthProvider;
 import org.apache.pinot.common.utils.SimpleHttpResponse;
 import org.apache.pinot.core.common.MinionConstants;
 import org.apache.pinot.spi.config.table.TableConfig;
@@ -50,6 +51,7 @@ import static org.apache.pinot.integration.tests.BasicAuthTestUtils.AUTH_HEADER;
 
 
 public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
+  final static String AUTH_PROVIDER_CLASS = UrlAuthProvider.class.getCanonicalName();
   final static URL AUTH_URL = UrlAuthRealtimeIntegrationTest.class.getResource("/url-auth-token.txt");
   final static URL AUTH_URL_PREFIXED = UrlAuthRealtimeIntegrationTest.class.getResource("/url-auth-token-prefixed.txt");
   final static String AUTH_PREFIX = "Basic";
@@ -97,6 +99,7 @@ public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
   @Override
   public Map<String, Object> getDefaultControllerConfiguration() {
     Map<String, Object> conf = BasicAuthTestUtils.addControllerConfiguration(super.getDefaultControllerConfiguration());
+    conf.put("controller.segment.fetcher.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.put("controller.segment.fetcher.auth.url", AUTH_URL);
     conf.put("controller.segment.fetcher.auth.prefix", AUTH_PREFIX);
 
@@ -114,10 +117,13 @@ public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
   @Override
   protected PinotConfiguration getDefaultServerConfiguration() {
     PinotConfiguration conf = BasicAuthTestUtils.addServerConfiguration(super.getDefaultServerConfiguration().toMap());
+    conf.setProperty("pinot.server.segment.fetcher.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.setProperty("pinot.server.segment.fetcher.auth.url", AUTH_URL);
     conf.setProperty("pinot.server.segment.fetcher.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("pinot.server.segment.uploader.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.setProperty("pinot.server.segment.uploader.auth.url", AUTH_URL);
     conf.setProperty("pinot.server.segment.uploader.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("pinot.server.instance.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.setProperty("pinot.server.instance.auth.url", AUTH_URL);
     conf.setProperty("pinot.server.instance.auth.prefix", AUTH_PREFIX);
 
@@ -127,8 +133,10 @@ public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
   @Override
   protected PinotConfiguration getDefaultMinionConfiguration() {
     PinotConfiguration conf = BasicAuthTestUtils.addMinionConfiguration(super.getDefaultMinionConfiguration().toMap());
+    conf.setProperty("segment.fetcher.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.setProperty("segment.fetcher.auth.url", AUTH_URL_PREFIXED);
     conf.setProperty("segment.fetcher.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("task.auth.provider.class", AUTH_PROVIDER_CLASS);
     conf.setProperty("task.auth.url", AUTH_URL_PREFIXED);
     conf.setProperty("task.auth.prefix", AUTH_PREFIX);
 
@@ -182,6 +190,13 @@ public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
     sendDeleteRequest(
         _controllerRequestURLBuilder.forTableDelete(TableNameBuilder.REALTIME.tableNameWithType(tableName)),
         AUTH_HEADER);
+  }
+
+  @Test(expectedExceptions = IOException.class)
+  public void testUnauthenticatedFailure()
+      throws IOException {
+    sendDeleteRequest(
+        _controllerRequestURLBuilder.forTableDelete(TableNameBuilder.REALTIME.tableNameWithType("mytable")));
   }
 
   @Test

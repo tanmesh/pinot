@@ -123,17 +123,12 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
     return this;
   }
 
-  public AddTenantCommand setAuthToken(String authToken) {
-    _authToken = authToken;
-    return this;
-  }
-
   public AddTenantCommand setExecute(boolean exec) {
     _exec = exec;
     return this;
   }
 
-  public AddTenantCommand setAuthPRovider(AuthProvider authProvider) {
+  public AddTenantCommand setAuthProvider(AuthProvider authProvider) {
     _authProvider = authProvider;
     return this;
   }

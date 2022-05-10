@@ -70,7 +70,7 @@ public abstract class BaseSingleSegmentConversionExecutor extends BaseTaskExecut
     String downloadURL = configs.get(MinionConstants.DOWNLOAD_URL_KEY);
     String uploadURL = configs.get(MinionConstants.UPLOAD_URL_KEY);
     String originalSegmentCrc = configs.get(MinionConstants.ORIGINAL_SEGMENT_CRC_KEY);
-    AuthProvider authProvider = AuthProviderUtils.makeProvider(configs.get(MinionConstants.AUTH_TOKEN));
+    AuthProvider authProvider = AuthProviderUtils.makeStaticProvider(configs.get(MinionConstants.AUTH_TOKEN));
 
     long currentSegmentCrc = getSegmentCrc(tableNameWithType, segmentName);
     if (Long.parseLong(originalSegmentCrc) != currentSegmentCrc) {
