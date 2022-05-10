@@ -23,6 +23,9 @@ import java.util.Map;
 import org.apache.pinot.spi.auth.AuthProvider;
 
 
+/**
+ * Noop auth provider
+ */
 public class NullAuthProvider implements AuthProvider {
   public NullAuthProvider() {
     // left blank

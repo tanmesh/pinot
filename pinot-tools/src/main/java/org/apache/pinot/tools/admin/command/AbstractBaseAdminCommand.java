@@ -141,10 +141,11 @@ public class AbstractBaseAdminCommand extends AbstractBaseCommand {
   /**
    * Generate auth token from pass-thru token or generate basic auth from user/password pair
    *
+   * @param provider optional provider
+   * @param tokenUrl optional token url
    * @param authToken optional pass-thru token
    * @param user optional username
    * @param password optional password
-   * @param tokenUrl optional token url
    * @return auth token, or null if neither pass-thru token nor user info available
    */
   @Nullable
