@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import groovy.lang.IntRange;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -48,11 +49,11 @@ import org.testng.annotations.Test;
 import static org.apache.pinot.integration.tests.BasicAuthTestUtils.AUTH_HEADER;
 
 
-/**
- * NOTE: fully covered by TlsIntegrationTest. If that one fails for realtime segments try this one to isolate any TLS
- * related issues.
- */
-public class BasicAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
+public class UrlAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest {
+  final static URL AUTH_URL = UrlAuthRealtimeIntegrationTest.class.getResource("/url-auth-token.txt");
+  final static URL AUTH_URL_PREFIXED = UrlAuthRealtimeIntegrationTest.class.getResource("/url-auth-token-prefixed.txt");
+  final static String AUTH_PREFIX = "Basic";
+
   @BeforeClass
   public void setUp()
       throws Exception {
@@ -95,22 +96,43 @@ public class BasicAuthRealtimeIntegrationTest extends BaseClusterIntegrationTest
 
   @Override
   public Map<String, Object> getDefaultControllerConfiguration() {
-    return BasicAuthTestUtils.addControllerConfiguration(super.getDefaultControllerConfiguration());
+    Map<String, Object> conf = BasicAuthTestUtils.addControllerConfiguration(super.getDefaultControllerConfiguration());
+    conf.put("controller.segment.fetcher.auth.url", AUTH_URL);
+    conf.put("controller.segment.fetcher.auth.prefix", AUTH_PREFIX);
+
+    return conf;
   }
 
   @Override
   protected PinotConfiguration getDefaultBrokerConfiguration() {
-    return BasicAuthTestUtils.addBrokerConfiguration(super.getDefaultBrokerConfiguration().toMap());
+    PinotConfiguration conf = BasicAuthTestUtils.addBrokerConfiguration(super.getDefaultBrokerConfiguration().toMap());
+    // no customization yet
+
+    return conf;
   }
 
   @Override
   protected PinotConfiguration getDefaultServerConfiguration() {
-    return BasicAuthTestUtils.addServerConfiguration(super.getDefaultServerConfiguration().toMap());
+    PinotConfiguration conf = BasicAuthTestUtils.addServerConfiguration(super.getDefaultServerConfiguration().toMap());
+    conf.setProperty("pinot.server.segment.fetcher.auth.url", AUTH_URL);
+    conf.setProperty("pinot.server.segment.fetcher.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("pinot.server.segment.uploader.auth.url", AUTH_URL);
+    conf.setProperty("pinot.server.segment.uploader.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("pinot.server.instance.auth.url", AUTH_URL);
+    conf.setProperty("pinot.server.instance.auth.prefix", AUTH_PREFIX);
+
+    return conf;
   }
 
   @Override
   protected PinotConfiguration getDefaultMinionConfiguration() {
-    return BasicAuthTestUtils.addMinionConfiguration(super.getDefaultMinionConfiguration().toMap());
+    PinotConfiguration conf = BasicAuthTestUtils.addMinionConfiguration(super.getDefaultMinionConfiguration().toMap());
+    conf.setProperty("segment.fetcher.auth.url", AUTH_URL_PREFIXED);
+    conf.setProperty("segment.fetcher.auth.prefix", AUTH_PREFIX);
+    conf.setProperty("task.auth.url", AUTH_URL_PREFIXED);
+    conf.setProperty("task.auth.prefix", AUTH_PREFIX);
+
+    return conf;
   }
 
   @Override
