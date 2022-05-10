@@ -126,7 +126,7 @@ public class HttpClient implements AutoCloseable {
       @Nullable AuthProvider authProvider)
       throws IOException {
     RequestBuilder requestBuilder = RequestBuilder.get(uri).setVersion(HttpVersion.HTTP_1_1);
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     if (MapUtils.isNotEmpty(headers)) {
       for (Map.Entry<String, String> header : headers.entrySet()) {
         requestBuilder.addHeader(header.getKey(), header.getValue());
@@ -155,7 +155,7 @@ public class HttpClient implements AutoCloseable {
       @Nullable AuthProvider authProvider)
       throws IOException {
     RequestBuilder requestBuilder = RequestBuilder.delete(uri).setVersion(HttpVersion.HTTP_1_1);
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     if (MapUtils.isNotEmpty(headers)) {
       for (Map.Entry<String, String> header : headers.entrySet()) {
         requestBuilder.addHeader(header.getKey(), header.getValue());
@@ -183,7 +183,7 @@ public class HttpClient implements AutoCloseable {
     if (payload != null) {
       requestBuilder.setEntity(payload);
     }
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     if (MapUtils.isNotEmpty(headers)) {
       for (Map.Entry<String, String> header : headers.entrySet()) {
         requestBuilder.addHeader(header.getKey(), header.getValue());
@@ -210,7 +210,7 @@ public class HttpClient implements AutoCloseable {
     if (payload != null) {
       requestBuilder.setEntity(payload);
     }
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     if (MapUtils.isNotEmpty(headers)) {
       for (Map.Entry<String, String> header : headers.entrySet()) {
         requestBuilder.addHeader(header.getKey(), header.getValue());
@@ -453,7 +453,7 @@ public class HttpClient implements AutoCloseable {
   private static HttpUriRequest getDownloadFileRequest(URI uri, int socketTimeoutMs, AuthProvider authProvider,
       List<Header> httpHeaders) {
     RequestBuilder requestBuilder = RequestBuilder.get(uri).setVersion(HttpVersion.HTTP_1_1);
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     HttpClient.setTimeout(requestBuilder, socketTimeoutMs);
     String userInfo = uri.getUserInfo();
     if (userInfo != null) {

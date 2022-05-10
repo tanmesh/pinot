@@ -53,10 +53,8 @@ public interface InstanceDataManagerConfig {
 
   int getMaxParallelSegmentBuilds();
 
-  String getAuthToken();
-
-  String getAuthTokenUrl();
-
+//  Map<String, Object> getAuthConfig();
+//
   String getSegmentDirectoryLoader();
 
   long getErrorCacheSize();

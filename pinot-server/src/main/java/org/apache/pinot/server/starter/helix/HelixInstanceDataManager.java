@@ -42,6 +42,7 @@ import org.apache.helix.HelixManager;
 import org.apache.helix.ZNRecord;
 import org.apache.helix.model.ExternalView;
 import org.apache.helix.store.zk.ZkHelixPropertyStore;
+import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.metadata.ZKMetadataProvider;
 import org.apache.pinot.common.metadata.segment.SegmentZKMetadata;
 import org.apache.pinot.common.metrics.ServerMetrics;
@@ -60,6 +61,7 @@ import org.apache.pinot.segment.local.segment.index.loader.IndexLoadingConfig;
 import org.apache.pinot.segment.spi.ImmutableSegment;
 import org.apache.pinot.segment.spi.IndexSegment;
 import org.apache.pinot.segment.spi.SegmentMetadata;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.config.table.TableConfig;
 import org.apache.pinot.spi.data.Schema;
 import org.apache.pinot.spi.env.PinotConfiguration;
@@ -86,7 +88,7 @@ public class HelixInstanceDataManager implements InstanceDataManager {
   private HelixManager _helixManager;
   private ServerMetrics _serverMetrics;
   private ZkHelixPropertyStore<ZNRecord> _propertyStore;
-  private String _authToken;
+  private AuthProvider _authProvider;
   private SegmentUploader _segmentUploader;
 
   // Fixed size LRU cache for storing last N errors on the instance.
@@ -103,7 +105,7 @@ public class HelixInstanceDataManager implements InstanceDataManager {
     _instanceId = _instanceDataManagerConfig.getInstanceId();
     _helixManager = helixManager;
     _serverMetrics = serverMetrics;
-    _authToken = config.getProperty(CommonConstants.Server.CONFIG_OF_AUTH_TOKEN);
+    _authProvider = AuthProviderUtils.extractAuthProvider(config, CommonConstants.Server.CONFIG_OF_AUTH);
     _segmentUploader = new PinotFSSegmentUploader(_instanceDataManagerConfig.getSegmentStoreUri(),
         PinotFSSegmentUploader.DEFAULT_SEGMENT_UPLOAD_TIMEOUT_MILLIS);
 
@@ -180,10 +182,10 @@ public class HelixInstanceDataManager implements InstanceDataManager {
     LOGGER.info("Creating table data manager for table: {}", tableNameWithType);
     TableDataManagerConfig tableDataManagerConfig =
         TableDataManagerConfig.getDefaultHelixTableDataManagerConfig(_instanceDataManagerConfig, tableNameWithType);
-    tableDataManagerConfig.overrideConfigs(tableConfig, _authToken);
+    tableDataManagerConfig.overrideConfigs(tableConfig);
     TableDataManager tableDataManager =
         TableDataManagerProvider.getTableDataManager(tableDataManagerConfig, _instanceId, _propertyStore,
-            _serverMetrics, _helixManager, _errorCache);
+            _serverMetrics, _helixManager, _errorCache, _authProvider);
     tableDataManager.start();
     LOGGER.info("Created table data manager for table: {}", tableNameWithType);
     return tableDataManager;

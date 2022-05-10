@@ -130,7 +130,7 @@ public class QueryExecutorTest {
     @SuppressWarnings("unchecked")
     TableDataManager tableDataManager =
         TableDataManagerProvider.getTableDataManager(tableDataManagerConfig, "testInstance",
-            mock(ZkHelixPropertyStore.class), mock(ServerMetrics.class), mock(HelixManager.class), null);
+            mock(ZkHelixPropertyStore.class), mock(ServerMetrics.class), mock(HelixManager.class), null, null);
     tableDataManager.start();
     for (ImmutableSegment indexSegment : _indexSegments) {
       tableDataManager.addSegment(indexSegment);

@@ -74,7 +74,7 @@ public class Server2ControllerSegmentUploader implements SegmentUploader {
     try {
       String responseStr = _fileUploadDownloadClient
           .uploadSegment(_controllerSegmentUploadCommitUrl, _segmentName, segmentFile,
-              AuthProviderUtils.toHeaders(_authProvider), null, _segmentUploadRequestTimeoutMs).getResponse();
+              AuthProviderUtils.toRequestHeaders(_authProvider), null, _segmentUploadRequestTimeoutMs).getResponse();
       response = SegmentCompletionProtocol.Response.fromJsonString(responseStr);
       _segmentLogger.info("Controller response {} for {}", response.toJsonString(), _controllerSegmentUploadCommitUrl);
       if (response.getStatus().equals(SegmentCompletionProtocol.ControllerResponseStatus.NOT_LEADER)) {

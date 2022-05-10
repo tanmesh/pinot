@@ -36,8 +36,7 @@ public class TableDataManagerConfig {
   private static final String TABLE_DATA_MANAGER_CONSUMER_DIRECTORY = "consumerDirectory";
   private static final String TABLE_DATA_MANAGER_NAME = "name";
   private static final String TABLE_IS_DIMENSION = "isDimTable";
-  private static final String TABLE_DATA_MANGER_AUTH_TOKEN = "authToken";
-  private static final String TABLE_DATA_MANGER_AUTH_TOKEN_URL = "authTokenUrl";
+  private static final String TABLE_DATA_MANGER_AUTH = "auth";
 
   private final Configuration _tableDataManagerConfig;
 
@@ -69,13 +68,9 @@ public class TableDataManagerConfig {
     return _tableDataManagerConfig.getBoolean(TABLE_IS_DIMENSION);
   }
 
-  public String getAuthToken() {
-    return _tableDataManagerConfig.getString(TABLE_DATA_MANGER_AUTH_TOKEN);
-  }
-
-  public String getAuthTokenUrl() {
-    return _tableDataManagerConfig.getString(TABLE_DATA_MANGER_AUTH_TOKEN_URL);
-  }
+//  public AuthConfig getAuthConfig() {
+//    return AuthProviderUtils.extractAuthConfig(_tableDataManagerConfig, TABLE_DATA_MANGER_AUTH);
+//  }
 
   public static TableDataManagerConfig getDefaultHelixTableDataManagerConfig(
       InstanceDataManagerConfig instanceDataManagerConfig, String tableNameWithType) {
@@ -87,17 +82,16 @@ public class TableDataManagerConfig {
     TableType tableType = TableNameBuilder.getTableTypeFromTableName(tableNameWithType);
     Preconditions.checkNotNull(tableType);
     defaultConfig.addProperty(TABLE_DATA_MANAGER_TYPE, tableType.name());
-    defaultConfig.addProperty(TABLE_DATA_MANGER_AUTH_TOKEN, instanceDataManagerConfig.getAuthToken());
-    defaultConfig.addProperty(TABLE_DATA_MANGER_AUTH_TOKEN_URL, instanceDataManagerConfig.getAuthTokenUrl());
+//    instanceDataManagerConfig.getAuthConfig().forEach((key, value) -> defaultConfig
+//        .addProperty(TABLE_DATA_MANGER_AUTH + "." + key, value));
 
     return new TableDataManagerConfig(defaultConfig);
   }
 
-  public void overrideConfigs(TableConfig tableConfig, String authToken) {
+  public void overrideConfigs(TableConfig tableConfig) {
     // Override table level configs
 
     _tableDataManagerConfig.addProperty(TABLE_IS_DIMENSION, tableConfig.isDimTable());
-    _tableDataManagerConfig.addProperty(TABLE_DATA_MANGER_AUTH_TOKEN, authToken);
 
     // If we wish to override some table level configs using table config, override them here
     // Note: the configs in TableDataManagerConfig is immutable once the table is created, which mean it will not pick

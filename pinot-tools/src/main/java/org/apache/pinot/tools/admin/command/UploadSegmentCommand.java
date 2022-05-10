@@ -24,10 +24,10 @@ import java.net.URI;
 import java.util.Collections;
 import org.apache.commons.io.FileUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.utils.FileUploadDownloadClient;
 import org.apache.pinot.common.utils.TarGzCompressionUtils;
 import org.apache.pinot.common.utils.http.HttpClient;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.utils.CommonConstants;
 import org.apache.pinot.spi.utils.NetUtils;
 import org.apache.pinot.tools.Command;
@@ -77,6 +77,8 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
+
+  private AuthProvider _authProvider;
 
   @Override
   public boolean getHelp() {
@@ -143,6 +145,11 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
     return this;
   }
 
+  public UploadSegmentCommand setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
+    return this;
+  }
+
   @Override
   public boolean execute()
       throws Exception {
@@ -177,10 +184,9 @@ public class UploadSegmentCommand extends AbstractBaseAdminCommand implements Co
 
         LOGGER.info("Uploading segment tar file: {}", segmentTarFile);
         fileUploadDownloadClient.uploadSegment(uploadSegmentHttpURI, segmentTarFile.getName(), segmentTarFile,
-            AuthProviderUtils.toHeaders(AuthProviderUtils.inferProvider(makeAuthToken(_authToken, _user, _password),
-                _authTokenUrl)), Collections.singletonList(new BasicNameValuePair(
-                    FileUploadDownloadClient.QueryParameters.TABLE_NAME, _tableName)),
-            HttpClient.DEFAULT_SOCKET_TIMEOUT_MS);
+            makeAuthHeaders(makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user, _password)),
+            Collections.singletonList(new BasicNameValuePair(FileUploadDownloadClient.QueryParameters.TABLE_NAME,
+                _tableName)), HttpClient.DEFAULT_SOCKET_TIMEOUT_MS);
       }
     } finally {
       // Delete the temporary working directory.

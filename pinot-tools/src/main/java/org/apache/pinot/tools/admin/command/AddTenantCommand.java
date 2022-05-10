@@ -18,6 +18,7 @@
  */
 package org.apache.pinot.tools.admin.command;
 
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.config.tenant.Tenant;
 import org.apache.pinot.spi.config.tenant.TenantRole;
 import org.apache.pinot.spi.utils.CommonConstants;
@@ -80,6 +81,8 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
 
   private String _controllerAddress;
 
+  private AuthProvider _authProvider;
+
   public AddTenantCommand setControllerUrl(String url) {
     _controllerAddress = url;
     return this;
@@ -130,6 +133,11 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
     return this;
   }
 
+  public AddTenantCommand setAuthPRovider(AuthProvider authProvider) {
+    _authProvider = authProvider;
+    return this;
+  }
+
   @Override
   public boolean execute()
       throws Exception {
@@ -150,7 +158,8 @@ public class AddTenantCommand extends AbstractBaseAdminCommand implements Comman
     Tenant tenant = new Tenant(_role, _name, _instanceCount, _offlineInstanceCount, _realtimeInstanceCount);
     String res = AbstractBaseAdminCommand
         .sendRequest("POST", ControllerRequestURLBuilder.baseUrl(_controllerAddress).forTenantCreate(),
-            tenant.toJsonString(), makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
+            tenant.toJsonString(), makeAuthHeaders(makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user,
+                _password)));
 
     LOGGER.info(res);
     System.out.print(res);

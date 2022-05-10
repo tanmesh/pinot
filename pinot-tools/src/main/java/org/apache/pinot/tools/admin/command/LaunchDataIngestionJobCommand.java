@@ -21,8 +21,8 @@ package org.apache.pinot.tools.admin.command;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.utils.TlsUtils;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.ingestion.batch.IngestionJobLauncher;
 import org.apache.pinot.spi.ingestion.batch.spec.SegmentGenerationJobSpec;
 import org.apache.pinot.spi.ingestion.batch.spec.TlsSpec;
@@ -62,6 +62,8 @@ public class LaunchDataIngestionJobCommand extends AbstractBaseAdminCommand impl
   @CommandLine.Option(names = {"-authTokenUrl"}, required = false, description = "Http auth token url.")
   private String _authTokenUrl;
 
+  private AuthProvider _authProvider;
+
   public String getJobSpecFile() {
     return _jobSpecFile;
   }
@@ -84,6 +86,10 @@ public class LaunchDataIngestionJobCommand extends AbstractBaseAdminCommand impl
 
   public void setPropertyFile(String propertyFile) {
     _propertyFile = propertyFile;
+  }
+
+  public void setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
   }
 
   @Override
@@ -117,7 +123,7 @@ public class LaunchDataIngestionJobCommand extends AbstractBaseAdminCommand impl
     }
 
     if (StringUtils.isBlank(spec.getAuthToken())) {
-      spec.setAuthToken(AuthProviderUtils.resolveToToken(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
+      spec.setAuthToken(makeAuthProvider(_authProvider, _authToken, _user, _password, _authTokenUrl).getTaskToken());
     }
 
     try {

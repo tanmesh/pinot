@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.apache.commons.io.FileUtils;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.config.tenant.TenantRole;
 import org.apache.pinot.spi.env.PinotConfiguration;
 import org.apache.pinot.spi.filesystem.PinotFSFactory;
@@ -63,8 +64,7 @@ public class QuickstartRunner {
   private final int _numMinions;
   private final File _tempDir;
   private final boolean _enableTenantIsolation;
-  private final String _authToken;
-  private final String _authTokenUrl;
+  private final AuthProvider _authProvider;
   private final Map<String, Object> _configOverrides;
   private final boolean _deleteExistingData;
 
@@ -78,21 +78,12 @@ public class QuickstartRunner {
   public QuickstartRunner(List<QuickstartTableRequest> tableRequests, int numControllers, int numBrokers,
       int numServers, int numMinions, File tempDir, Map<String, Object> configOverrides)
       throws Exception {
-    this(tableRequests, numControllers, numBrokers, numServers, numMinions, tempDir, true, null,
-        null, configOverrides, null,
+    this(tableRequests, numControllers, numBrokers, numServers, numMinions, tempDir, true, null, configOverrides, null,
         true);
   }
 
   public QuickstartRunner(List<QuickstartTableRequest> tableRequests, int numControllers, int numBrokers,
-      int numServers, int numMinions, File tempDir, boolean enableIsolation, String authToken,
-      Map<String, Object> configOverrides, String zkExternalAddress, boolean deleteExistingData)
-      throws Exception {
-    this(tableRequests, numControllers, numBrokers, numServers, numMinions, tempDir, enableIsolation, authToken, null,
-        configOverrides, zkExternalAddress, deleteExistingData);
-  }
-
-  public QuickstartRunner(List<QuickstartTableRequest> tableRequests, int numControllers, int numBrokers,
-      int numServers, int numMinions, File tempDir, boolean enableIsolation, String authToken, String authTokenUrl,
+      int numServers, int numMinions, File tempDir, boolean enableIsolation, AuthProvider authProvider,
       Map<String, Object> configOverrides, String zkExternalAddress, boolean deleteExistingData)
       throws Exception {
     _tableRequests = tableRequests;
@@ -102,8 +93,7 @@ public class QuickstartRunner {
     _numMinions = numMinions;
     _tempDir = tempDir;
     _enableTenantIsolation = enableIsolation;
-    _authToken = authToken;
-    _authTokenUrl = authTokenUrl;
+    _authProvider = authProvider;
     _configOverrides = configOverrides;
     _zkExternalAddress = zkExternalAddress;
     _deleteExistingData = deleteExistingData;
@@ -229,8 +219,8 @@ public class QuickstartRunner {
   public void bootstrapTable()
       throws Exception {
     for (QuickstartTableRequest request : _tableRequests) {
-      if (!new BootstrapTableTool("http", "localhost", _controllerPorts.get(0), request.getBootstrapTableDir(),
-          _authToken, _authTokenUrl).execute()) {
+      if (!new BootstrapTableTool("http", "localhost", _controllerPorts.get(0),
+          request.getBootstrapTableDir(), _authProvider).execute()) {
         throw new RuntimeException("Failed to bootstrap table with request - " + request);
       }
     }
@@ -240,8 +230,8 @@ public class QuickstartRunner {
       throws Exception {
     int brokerPort = _brokerPorts.get(RANDOM.nextInt(_brokerPorts.size()));
     return JsonUtils.stringToJsonNode(
-        new PostQueryCommand().setBrokerPort(String.valueOf(brokerPort)).setAuthToken(_authToken)
-            .setAuthTokenUrl(_authTokenUrl).setQuery(query).run());
+        new PostQueryCommand().setBrokerPort(String.valueOf(brokerPort)).setAuthProvider(_authProvider)
+            .setQuery(query).run());
   }
 
   public static void registerDefaultPinotFS() {

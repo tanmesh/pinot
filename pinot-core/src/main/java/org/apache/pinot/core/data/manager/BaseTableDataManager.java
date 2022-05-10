@@ -36,7 +36,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.helix.HelixManager;
 import org.apache.helix.ZNRecord;
 import org.apache.helix.store.zk.ZkHelixPropertyStore;
-import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.metadata.ZKMetadataProvider;
 import org.apache.pinot.common.metadata.segment.SegmentZKMetadata;
 import org.apache.pinot.common.metrics.ServerGauge;
@@ -94,7 +93,7 @@ public abstract class BaseTableDataManager implements TableDataManager {
   @Override
   public void init(TableDataManagerConfig tableDataManagerConfig, String instanceId,
       ZkHelixPropertyStore<ZNRecord> propertyStore, ServerMetrics serverMetrics, HelixManager helixManager,
-      @Nullable LoadingCache<Pair<String, String>, SegmentErrorInfo> errorCache) {
+      @Nullable LoadingCache<Pair<String, String>, SegmentErrorInfo> errorCache, AuthProvider authProvider) {
     LOGGER.info("Initializing table data manager for table: {}", tableDataManagerConfig.getTableName());
 
     _tableDataManagerConfig = tableDataManagerConfig;
@@ -102,8 +101,7 @@ public abstract class BaseTableDataManager implements TableDataManager {
     _propertyStore = propertyStore;
     _serverMetrics = serverMetrics;
     _helixManager = helixManager;
-    _authProvider = AuthProviderUtils.inferProvider(tableDataManagerConfig.getAuthToken(),
-        tableDataManagerConfig.getAuthTokenUrl());
+    _authProvider = authProvider;
 
     _tableNameWithType = tableDataManagerConfig.getTableName();
     _tableDataDir = tableDataManagerConfig.getDataDir();

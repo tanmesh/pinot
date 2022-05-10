@@ -204,18 +204,13 @@ public class PinotIngestionRestletResource {
         });
     Schema schema = _pinotHelixResourceManager.getTableSchema(tableNameWithType);
 
+    AuthProvider authProvider = AuthProviderUtils.extractAuthProvider(_controllerConf,
+        CommonConstants.Controller.PREFIX_OF_CONFIG_OF_SEGMENT_FETCHER_FACTORY + ".auth");
+
     FileIngestionHelper fileIngestionHelper =
         new FileIngestionHelper(tableConfig, schema, batchConfigMap, getControllerUri(),
-            new File(_controllerConf.getDataDir(), UPLOAD_DIR), getAuthProvider());
+            new File(_controllerConf.getDataDir(), UPLOAD_DIR), authProvider);
     return fileIngestionHelper.buildSegmentAndPush(payload);
-  }
-
-  private AuthProvider getAuthProvider() {
-    String authToken = _controllerConf
-        .getProperty(CommonConstants.Controller.PREFIX_OF_CONFIG_OF_SEGMENT_FETCHER_FACTORY + ".auth.token");
-    String authTokenUrl = _controllerConf
-        .getProperty(CommonConstants.Controller.PREFIX_OF_CONFIG_OF_SEGMENT_FETCHER_FACTORY + ".auth.token.url");
-    return AuthProviderUtils.inferProvider(authToken, authTokenUrl);
   }
 
   private URI getControllerUri() {

@@ -62,10 +62,10 @@ public class HelixInstanceDataManagerConfig implements InstanceDataManagerConfig
   public static final String SEGMENT_FORMAT_VERSION = "segment.format.version";
   // Key of whether to enable reloading consuming segments
   public static final String INSTANCE_RELOAD_CONSUMING_SEGMENT = "reload.consumingSegment";
-  // Key of the auth token
-  public static final String AUTH_TOKEN = "auth.token";
-  // Key of the auth token url
-  public static final String AUTH_TOKEN_URL = "auth.token.url";
+  // // (legacy) key of the auth token
+  //public static final String LEGACY_AUTH_TOKEN = "auth.token";
+  // // Key of the auth configs
+  //public static final String AUTH = "auth";
   // Key of segment directory loader
   public static final String SEGMENT_DIRECTORY_LOADER = "segment.directory.loader";
 
@@ -213,15 +213,18 @@ public class HelixInstanceDataManagerConfig implements InstanceDataManagerConfig
         .getProperty(MAX_PARALLEL_SEGMENT_BUILDS, DEFAULT_MAX_PARALLEL_SEGMENT_BUILDS);
   }
 
-  @Override
-  public String getAuthToken() {
-    return _instanceDataManagerConfiguration.getProperty(AUTH_TOKEN);
-  }
-
-  @Override
-  public String getAuthTokenUrl() {
-    return _instanceDataManagerConfiguration.getProperty(AUTH_TOKEN_URL);
-  }
+//  @Override
+//  public Map<String, Object> getAuthConfig() {
+//    Map<String, Object> prop = new HashMap<>(_instanceDataManagerConfiguration.getProperty(AUTH, Map.class));
+//
+//     // legacy compatibility
+//    String authToken = _instanceDataManagerConfiguration.getProperty(LEGACY_AUTH_TOKEN);
+//    if (StringUtils.isNotBlank(authToken)) {
+//      prop.put(LEGACY_AUTH_TOKEN, authToken);
+//    }
+//
+//    return prop;
+//  }
 
   @Override
   public String getSegmentDirectoryLoader() {

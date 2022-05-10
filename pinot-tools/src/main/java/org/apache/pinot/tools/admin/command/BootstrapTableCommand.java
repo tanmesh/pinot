@@ -18,6 +18,7 @@
  */
 package org.apache.pinot.tools.admin.command;
 
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.plugin.PluginManager;
 import org.apache.pinot.spi.utils.CommonConstants;
 import org.apache.pinot.spi.utils.NetUtils;
@@ -94,6 +95,8 @@ public class BootstrapTableCommand extends AbstractBaseAdminCommand implements C
       description = "Print this message.")
   private boolean _help = false;
 
+  private AuthProvider _authProvider;
+
   @Override
   public boolean getHelp() {
     return _help;
@@ -106,6 +109,11 @@ public class BootstrapTableCommand extends AbstractBaseAdminCommand implements C
 
   public BootstrapTableCommand setDir(String dir) {
     _dir = dir;
+    return this;
+  }
+
+  public BootstrapTableCommand setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
     return this;
   }
 
@@ -130,9 +138,7 @@ public class BootstrapTableCommand extends AbstractBaseAdminCommand implements C
     if (_controllerHost == null) {
       _controllerHost = NetUtils.getHostAddress();
     }
-    String token = makeAuthToken(_authToken, _user, _password);
-    return new BootstrapTableTool(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort), _dir, token,
-        _authTokenUrl)
-        .execute();
+    return new BootstrapTableTool(_controllerProtocol, _controllerHost, Integer.parseInt(_controllerPort), _dir,
+        makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user, _password)).execute();
   }
 }

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.pinot.common.auth.AuthProviderUtils;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.data.readers.FileFormat;
 import org.apache.pinot.spi.filesystem.PinotFSFactory;
 import org.apache.pinot.spi.ingestion.batch.BatchConfigProperties;
@@ -100,6 +100,8 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, help = true, description = "Print this message.")
   private boolean _help = false;
 
+  private AuthProvider _authProvider;
+
   public ImportDataCommand setDataFilePath(String dataFilePath) {
     _dataFilePath = dataFilePath;
     return this;
@@ -154,6 +156,11 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
 
   public ImportDataCommand setAuthTokenUrl(String authTokenUrl) {
     _authTokenUrl = authTokenUrl;
+    return this;
+  }
+
+  public ImportDataCommand setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
     return this;
   }
 
@@ -262,7 +269,7 @@ public class ImportDataCommand extends AbstractBaseAdminCommand implements Comma
     spec.setCleanUpOutputDir(true);
     spec.setOverwriteOutput(true);
     spec.setJobType("SegmentCreationAndTarPush");
-    spec.setAuthToken(AuthProviderUtils.resolveToToken(makeAuthToken(_authToken, _user, _password), _authTokenUrl));
+    spec.setAuthToken(makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user, _password).getTaskToken());
 
     // set ExecutionFrameworkSpec
     ExecutionFrameworkSpec executionFrameworkSpec = new ExecutionFrameworkSpec();

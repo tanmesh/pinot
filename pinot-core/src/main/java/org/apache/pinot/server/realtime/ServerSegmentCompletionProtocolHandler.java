@@ -75,8 +75,7 @@ public class ServerSegmentCompletionProtocolHandler {
     _segmentUploadRequestTimeoutMs = uploaderConfig
         .getProperty(CONFIG_OF_SEGMENT_UPLOAD_REQUEST_TIMEOUT_MS, DEFAULT_SEGMENT_UPLOAD_REQUEST_TIMEOUT_MS);
 
-    _authProvider = AuthProviderUtils.inferProvider(uploaderConfig.getProperty(CONFIG_OF_SEGMENT_UPLOADER_AUTH_TOKEN),
-        uploaderConfig.getProperty(CONFIG_OF_SEGMENT_UPLOADER_AUTH_TOKEN_URL));
+    _authProvider = AuthProviderUtils.extractAuthProvider(uploaderConfig, CONFIG_OF_SEGMENT_UPLOADER_AUTH);
   }
 
   public ServerSegmentCompletionProtocolHandler(ServerMetrics serverMetrics, String tableNameWithType) {
@@ -215,7 +214,7 @@ public class ServerSegmentCompletionProtocolHandler {
     SegmentCompletionProtocol.Response response;
     try {
       String responseStr = _fileUploadDownloadClient
-          .sendSegmentCompletionProtocolRequest(new URI(url), AuthProviderUtils.toHeaders(_authProvider), null,
+          .sendSegmentCompletionProtocolRequest(new URI(url), AuthProviderUtils.toRequestHeaders(_authProvider), null,
               DEFAULT_OTHER_REQUESTS_TIMEOUT).getResponse();
       response = SegmentCompletionProtocol.Response.fromJsonString(responseStr);
       LOGGER.info("Controller response {} for {}", response.toJsonString(), url);
@@ -240,7 +239,7 @@ public class ServerSegmentCompletionProtocolHandler {
     SegmentCompletionProtocol.Response response;
     try {
       String responseStr = _fileUploadDownloadClient
-          .uploadSegmentMetadataFiles(new URI(url), metadataFiles, AuthProviderUtils.toHeaders(_authProvider),
+          .uploadSegmentMetadataFiles(new URI(url), metadataFiles, AuthProviderUtils.toRequestHeaders(_authProvider),
               null, _segmentUploadRequestTimeoutMs).getResponse();
       response = SegmentCompletionProtocol.Response.fromJsonString(responseStr);
       LOGGER.info("Controller response {} for {}", response.toJsonString(), url);

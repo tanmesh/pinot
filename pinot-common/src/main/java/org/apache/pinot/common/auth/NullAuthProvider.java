@@ -24,8 +24,21 @@ import org.apache.pinot.spi.auth.AuthProvider;
 
 
 public class NullAuthProvider implements AuthProvider {
+  public NullAuthProvider() {
+    // left blank
+  }
+
+  public NullAuthProvider(AuthConfig ignore) {
+    // left blank
+  }
+
   @Override
-  public Map<String, Object> getHttpHeaders() {
+  public Map<String, Object> getRequestHeaders() {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public String getTaskToken() {
+    return null;
   }
 }

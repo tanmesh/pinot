@@ -408,7 +408,7 @@ public class FileUploadDownloadClient implements AutoCloseable {
     RequestBuilder requestBuilder = RequestBuilder.post(uri).setVersion(HttpVersion.HTTP_1_1)
         .setHeader(HttpHeaders.CONTENT_TYPE, HttpClient.JSON_CONTENT_TYPE)
         .setEntity(new StringEntity(jsonRequestBody, ContentType.APPLICATION_JSON));
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     HttpClient.setTimeout(requestBuilder, socketTimeoutMs);
     return requestBuilder.build();
   }
@@ -417,7 +417,7 @@ public class FileUploadDownloadClient implements AutoCloseable {
       @Nullable AuthProvider authProvider) {
     RequestBuilder requestBuilder = RequestBuilder.post(uri).setVersion(HttpVersion.HTTP_1_1)
         .setHeader(HttpHeaders.CONTENT_TYPE, HttpClient.JSON_CONTENT_TYPE);
-    AuthProviderUtils.toHeaders(authProvider).forEach(requestBuilder::addHeader);
+    AuthProviderUtils.toRequestHeaders(authProvider).forEach(requestBuilder::addHeader);
     HttpClient.setTimeout(requestBuilder, socketTimeoutMs);
     return requestBuilder.build();
   }

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.controller.helix.core.minion.generator.PinotTaskGenerator;
 import org.apache.pinot.minion.executor.PinotTaskExecutor;
 import org.apache.pinot.spi.env.PinotConfiguration;
@@ -159,7 +160,7 @@ public class BasicAuthBatchIntegrationTest extends ClusterTest {
         .write(jobFileContents.replaceAll("9000", String.valueOf(getControllerPort())), new FileOutputStream(jobFile));
 
     new BootstrapTableTool("http", "localhost", getControllerPort(), baseDir.getAbsolutePath(),
-        AUTH_TOKEN, null).execute();
+        AuthProviderUtils.makeProvider(AUTH_TOKEN)).execute();
 
     Thread.sleep(5000);
 

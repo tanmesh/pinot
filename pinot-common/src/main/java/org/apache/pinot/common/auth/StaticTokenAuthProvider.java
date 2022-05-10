@@ -25,9 +25,13 @@ import org.apache.pinot.spi.auth.AuthProvider;
 
 
 public class StaticTokenAuthProvider implements AuthProvider {
-  final String _header;
-  final String _prefix;
-  final String _token;
+  public static final String HEADER = "header";
+  public static final String PREFIX = "prefix";
+  public static final String TOKEN = "token";
+
+  protected final String _header;
+  protected final String _prefix;
+  protected final String _token;
 
   public StaticTokenAuthProvider(String token) {
     _header = HttpHeaders.AUTHORIZATION;
@@ -35,14 +39,27 @@ public class StaticTokenAuthProvider implements AuthProvider {
     _token = token;
   }
 
-  public StaticTokenAuthProvider(String header, String prefix, String token) {
-    _header = header;
-    _prefix = prefix;
-    _token = token;
+  public StaticTokenAuthProvider(AuthConfig authConfig) {
+    _header = AuthProviderUtils.getOrDefault(authConfig, HEADER, HttpHeaders.AUTHORIZATION);
+    _prefix = AuthProviderUtils.getOrDefault(authConfig, PREFIX, "Basic");
+    _token = authConfig.getProperties().get(TOKEN).toString();
   }
 
   @Override
-  public Map<String, Object> getHttpHeaders() {
-    return Collections.singletonMap(_header, _prefix + _token);
+  public Map<String, Object> getRequestHeaders() {
+    return Collections.singletonMap(_header, makeToken());
+  }
+
+  @Override
+  public String getTaskToken() {
+    return makeToken();
+  }
+
+  private String makeToken() {
+    String token = _token;
+    if (token.startsWith(_prefix)) {
+      return token;
+    }
+    return _prefix + " " + _token;
   }
 }

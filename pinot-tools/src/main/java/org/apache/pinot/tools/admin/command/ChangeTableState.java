@@ -21,6 +21,7 @@ package org.apache.pinot.tools.admin.command;
 import java.net.URI;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.utils.CommonConstants;
 import org.apache.pinot.spi.utils.NetUtils;
 import org.apache.pinot.tools.Command;
@@ -64,6 +65,13 @@ public class ChangeTableState extends AbstractBaseAdminCommand implements Comman
       description = "Print this message.")
   private boolean _help = false;
 
+  private AuthProvider _authProvider;
+
+  public ChangeTableState setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
+    return this;
+  }
+
   @Override
   public boolean execute()
       throws Exception {
@@ -80,10 +88,8 @@ public class ChangeTableState extends AbstractBaseAdminCommand implements Comman
     URI uri = new URI(_controllerProtocol, null, _controllerHost, Integer.parseInt(_controllerPort),
         URI_TABLES_PATH + _tableName, "state=" + stateValue, null);
 
-    String token = makeAuthToken(_authToken, _user, _password);
-
     GetMethod httpGet = new GetMethod(uri.toString());
-    makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl)
+    makeAuthHeaders(makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user, _password))
         .forEach(header -> httpGet.addRequestHeader(header.getName(), header.getValue()));
 
     int status = httpClient.executeMethod(httpGet);

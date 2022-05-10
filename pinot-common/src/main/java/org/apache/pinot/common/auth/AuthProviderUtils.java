@@ -18,6 +18,7 @@
  */
 package org.apache.pinot.common.auth;
 
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.apache.pinot.spi.auth.AuthProvider;
+import org.apache.pinot.spi.env.PinotConfiguration;
 
 
 /**
@@ -39,55 +41,69 @@ public final class AuthProviderUtils {
   }
 
   /**
-   * Infer optimal auth provider based on the availability of static token, if any.
+   * Extract an AuthConfig from a pinot configuration subset namespace.
    *
-   * @param authToken static auth token
-   * @return auth provider
+   * @param pinotConfig pinot configuration
+   * @param namespace subset namespace
+   * @return auth config
    */
-  public static AuthProvider inferProvider(String authToken) {
-    return inferProvider(authToken, null);
+  public static AuthConfig extractAuthConfig(PinotConfiguration pinotConfig, String namespace) {
+    return new AuthConfig(pinotConfig.subset(namespace).toMap());
   }
 
   /**
-   * Infer optimal auth provider based on the availability of token and token url, if any.
+   * Create an AuthProvider after extracting a config from a pinot configuration subset namespace
+   * @see AuthProviderUtils#extractAuthConfig(PinotConfiguration, String)
    *
-   * @param authToken static auth token
-   * @param authTokenUrl dynamic token URL
+   * @param pinotConfig pinot configuration
+   * @param namespace subset namespace
    * @return auth provider
    */
-  public static AuthProvider inferProvider(String authToken, String authTokenUrl) {
-    if (StringUtils.isNotBlank(authTokenUrl)) {
-      return new UrlAuthProvider(authTokenUrl);
+  public static AuthProvider extractAuthProvider(PinotConfiguration pinotConfig, String namespace) {
+    return makeProvider(extractAuthConfig(pinotConfig, namespace));
+  }
+
+  /**
+   * Create auth provider based on the availability of a static token only, if any.
+   *
+   * @param authToken static auth token
+   * @return auth provider
+   */
+  public static AuthProvider makeProvider(String authToken) {
+    if (StringUtils.isBlank(authToken)) {
+      return new NullAuthProvider();
     }
-    if (StringUtils.isNotBlank(authToken)) {
-      return new StaticTokenAuthProvider(authToken);
+    return new StaticTokenAuthProvider(authToken);
+  }
+
+  /**
+   * Create auth provider based on an auth config. Mimics legacy behavior for static tokens if provided, or dynamic auth
+   * providers if additional configs are given.
+   *
+   * @param authConfig auth config
+   * @return auth provider
+   */
+  public static AuthProvider makeProvider(AuthConfig authConfig) {
+    if (authConfig == null) {
+      return new NullAuthProvider();
     }
+
+    Object providerClassValue = authConfig.getProperties().get(AuthConfig.PROVIDER_CLASS);
+    if (providerClassValue != null) {
+      try {
+        Class<?> providerClass = Class.forName(providerClassValue.toString());
+        Constructor<?> constructor = providerClass.getConstructor(AuthConfig.class);
+        return (AuthProvider) constructor.newInstance(authConfig);
+      } catch (Exception e) {
+        throw new IllegalStateException("Could not create AuthProvider " + providerClassValue, e);
+      }
+    }
+
+    if (authConfig.getProperties().containsKey(StaticTokenAuthProvider.TOKEN)) {
+      return new StaticTokenAuthProvider(authConfig);
+    }
+
     return new NullAuthProvider();
-  }
-
-  /**
-   * Resolve auth token right now, e.g. for job specs.
-   *
-   * @param authToken static auth token
-   * @param authTokenUrl dynamic token URL
-   * @return resolved static token
-   */
-  public static String resolveToToken(String authToken, String authTokenUrl) {
-    return resolveToToken(inferProvider(authToken, authTokenUrl));
-  }
-
-  /**
-   * Resolve auth provider to token right now.
-   *
-   * @param authProvider
-   * @return
-   */
-  public static String resolveToToken(AuthProvider authProvider) {
-    if (authProvider == null) {
-      return null;
-    }
-    return authProvider.getHttpHeaders().entrySet().stream().findFirst().map(Map.Entry::getValue)
-        .filter(Objects::nonNull).map(Object::toString).orElse(null);
   }
 
   /**
@@ -95,7 +111,7 @@ public final class AuthProviderUtils {
    * @param headers header map
    * @return list of http headers
    */
-  public static List<Header> toHeaders(@Nullable Map<String, Object> headers) {
+  public static List<Header> toRequestHeaders(@Nullable Map<String, Object> headers) {
     if (headers == null) {
       return Collections.emptyList();
     }
@@ -108,10 +124,40 @@ public final class AuthProviderUtils {
    * @param authProvider auth provider
    * @return list of http headers
    */
-  public static List<Header> toHeaders(@Nullable AuthProvider authProvider) {
+  public static List<Header> toRequestHeaders(@Nullable AuthProvider authProvider) {
     if (authProvider == null) {
       return Collections.emptyList();
     }
-    return toHeaders(authProvider.getHttpHeaders());
+    return toRequestHeaders(authProvider.getRequestHeaders());
+  }
+
+  /**
+   * Convenience helper to convert an optional authProvider to a static job spec token
+   * @param authProvider auth provider
+   * @return static token
+   */
+  public static String toTaskToken(@Nullable AuthProvider authProvider) {
+    if (authProvider == null) {
+      return null;
+    }
+    return authProvider.getTaskToken();
+  }
+
+  /**
+   * Helper to extract string values from complex AuthConfig instance.
+   *
+   * @param config auth config
+   * @param key config key
+   * @param defaultValue default value
+   * @return config value
+   */
+  static String getOrDefault(AuthConfig config, String key, String defaultValue) {
+    if (config == null || !config.getProperties().containsKey(key)) {
+      return defaultValue;
+    }
+    if (config.getProperties().get(key) instanceof String) {
+      return (String) config.getProperties().get(key);
+    }
+    throw new IllegalArgumentException("Expected String but got " + config.getProperties().get(key).getClass());
   }
 }

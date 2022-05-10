@@ -36,7 +36,11 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.pinot.common.auth.AuthProviderUtils;
+import org.apache.pinot.common.auth.NullAuthProvider;
+import org.apache.pinot.common.auth.StaticTokenAuthProvider;
+import org.apache.pinot.common.auth.UrlAuthProvider;
 import org.apache.pinot.core.auth.BasicAuthUtils;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.tools.AbstractBaseCommand;
 import org.apache.pinot.tools.utils.PinotConfigUtils;
 
@@ -125,13 +129,13 @@ public class AbstractBaseAdminCommand extends AbstractBaseCommand {
   }
 
   /**
-   * Generate an (optional) HTTP Authorization header given an auth token
+   * Generate an (optional) HTTP Authorization header given an auth config
    *
-   * @param authToken auth token
-   * @return list of 0 or 1 "Authorization" headers
+   * @param authProvider auth provider
+   * @return list of headers
    */
-  static List<Header> makeAuthHeaders(String authToken, String authTokenUrl) {
-    return AuthProviderUtils.toHeaders(AuthProviderUtils.inferProvider(authToken, authTokenUrl));
+  static List<Header> makeAuthHeaders(AuthProvider authProvider) {
+    return AuthProviderUtils.toRequestHeaders(authProvider);
   }
 
   /**
@@ -140,18 +144,28 @@ public class AbstractBaseAdminCommand extends AbstractBaseCommand {
    * @param authToken optional pass-thru token
    * @param user optional username
    * @param password optional password
+   * @param tokenUrl optional token url
    * @return auth token, or null if neither pass-thru token nor user info available
    */
   @Nullable
-  static String makeAuthToken(String authToken, String user, String password) {
+  static AuthProvider makeAuthProvider(AuthProvider provider, String tokenUrl, String authToken, String user,
+      String password) {
+    if (provider != null) {
+      return provider;
+    }
+
+    if (StringUtils.isNotBlank(tokenUrl)) {
+      return new UrlAuthProvider(tokenUrl);
+    }
+
     if (StringUtils.isNotBlank(authToken)) {
-      return authToken;
+      return new StaticTokenAuthProvider(authToken);
     }
 
     if (StringUtils.isNotBlank(user)) {
-      return BasicAuthUtils.toBasicAuthToken(user, password);
+      return new StaticTokenAuthProvider(BasicAuthUtils.toBasicAuthToken(user, password));
     }
 
-    return null;
+    return new NullAuthProvider();
   }
 }

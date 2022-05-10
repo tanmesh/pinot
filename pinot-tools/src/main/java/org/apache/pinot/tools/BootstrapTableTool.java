@@ -34,6 +34,7 @@ import org.apache.pinot.common.auth.AuthProviderUtils;
 import org.apache.pinot.common.minion.MinionClient;
 import org.apache.pinot.common.utils.TlsUtils;
 import org.apache.pinot.core.common.MinionConstants;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.config.table.TableConfig;
 import org.apache.pinot.spi.ingestion.batch.BatchConfigProperties;
 import org.apache.pinot.spi.ingestion.batch.IngestionJobLauncher;
@@ -54,13 +55,12 @@ public class BootstrapTableTool {
   private final String _controllerProtocol;
   private final String _controllerHost;
   private final int _controllerPort;
-  private final String _authToken;
-  private final String _authTokenUrl;
+  private final AuthProvider _authProvider;
   private final String _tableDir;
   private final MinionClient _minionClient;
 
   public BootstrapTableTool(String controllerProtocol, String controllerHost, int controllerPort, String tableDir,
-      String authToken, String authTokenUrl) {
+      AuthProvider authProvider) {
     Preconditions.checkNotNull(controllerProtocol);
     Preconditions.checkNotNull(controllerHost);
     Preconditions.checkNotNull(tableDir);
@@ -69,8 +69,7 @@ public class BootstrapTableTool {
     _controllerPort = controllerPort;
     _tableDir = tableDir;
     _minionClient = new MinionClient(controllerHost, String.valueOf(controllerPort));
-    _authToken = authToken;
-    _authTokenUrl = authTokenUrl;
+    _authProvider = authProvider;
   }
 
   public boolean execute()
@@ -120,7 +119,7 @@ public class BootstrapTableTool {
     return new AddTableCommand().setSchemaFile(schemaFile.getAbsolutePath())
         .setTableConfigFile(tableConfigFile.getAbsolutePath()).setControllerProtocol(_controllerProtocol)
         .setControllerHost(_controllerHost).setControllerPort(String.valueOf(_controllerPort)).setExecute(true)
-        .setAuthToken(_authToken).setAuthTokenUrl(_authTokenUrl).execute();
+        .setAuthProvider(_authProvider).execute();
   }
 
   private boolean bootstrapOfflineTable(File setupTableTmpDir, String tableName, File schemaFile,
@@ -183,7 +182,7 @@ public class BootstrapTableTool {
           }
 
           // url-based token needs to be resolved before job run
-          spec.setAuthToken(AuthProviderUtils.resolveToToken(_authToken, _authTokenUrl));
+          spec.setAuthToken(AuthProviderUtils.toTaskToken(_authProvider));
 
           IngestionJobLauncher.runIngestionJob(spec);
         }

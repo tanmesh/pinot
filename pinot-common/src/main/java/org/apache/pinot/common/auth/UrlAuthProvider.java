@@ -30,36 +30,53 @@ import org.apache.pinot.spi.auth.AuthProvider;
 
 
 public class UrlAuthProvider implements AuthProvider {
-  final String _header;
-  final String _prefix;
-  final URL _url;
+  public static final String HEADER = "header";
+  public static final String PREFIX = "prefix";
+  public static final String URL = "url";
+
+  protected final String _header;
+  protected final String _prefix;
+  protected final URL _url;
 
   public UrlAuthProvider(String url) {
     try {
       _header = HttpHeaders.AUTHORIZATION;
-      _prefix = "Bearer ";
+      _prefix = "Bearer";
       _url = new URL(url);
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException(e);
     }
   }
 
-  public UrlAuthProvider(String header, String prefix, String url) {
+  public UrlAuthProvider(AuthConfig authConfig) {
     try {
-      _header = header;
-      _prefix = prefix;
-      _url = new URL(url);
+      _header = AuthProviderUtils.getOrDefault(authConfig, HEADER, HttpHeaders.AUTHORIZATION);
+      _prefix = AuthProviderUtils.getOrDefault(authConfig, PREFIX, "Bearer");
+      _url = new URL(authConfig.getProperties().get(URL).toString());
     } catch (MalformedURLException e) {
       throw new IllegalArgumentException(e);
     }
   }
 
   @Override
-  public Map<String, Object> getHttpHeaders() {
+  public Map<String, Object> getRequestHeaders() {
+    return Collections.singletonMap(_header, makeToken());
+  }
+
+  @Override
+  public String getTaskToken() {
+    return makeToken();
+  }
+
+  private String makeToken() {
     try {
-      return Collections.singletonMap(_header, _prefix + IOUtils.toString(_url, StandardCharsets.UTF_8));
+      String token = IOUtils.toString(_url, StandardCharsets.UTF_8);
+      if (token.startsWith(_prefix)) {
+        return token;
+      }
+      return _prefix + " " + token;
     } catch (IOException e) {
-      throw new IllegalArgumentException("Could not access auth url", e);
+      throw new IllegalArgumentException("Could not resolve auth url " + _url, e);
     }
   }
 }

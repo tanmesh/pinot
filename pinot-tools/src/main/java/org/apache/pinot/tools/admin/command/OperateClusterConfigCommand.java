@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
+import org.apache.pinot.spi.auth.AuthProvider;
 import org.apache.pinot.spi.utils.CommonConstants;
 import org.apache.pinot.spi.utils.JsonUtils;
 import org.apache.pinot.spi.utils.NetUtils;
@@ -68,6 +69,8 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
   @CommandLine.Option(names = {"-help", "-h", "--h", "--help"}, required = false, help = true,
       description = "Print this message.")
   private boolean _help = false;
+
+  private AuthProvider _authProvider;
 
   @Override
   public boolean getHelp() {
@@ -140,6 +143,11 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
     return this;
   }
 
+  public OperateClusterConfigCommand setAuthProvider(AuthProvider authProvider) {
+    _authProvider = authProvider;
+    return this;
+  }
+
   public String run()
       throws Exception {
     if (_controllerHost == null) {
@@ -151,7 +159,8 @@ public class OperateClusterConfigCommand extends AbstractBaseAdminCommand implem
     }
     String clusterConfigUrl =
         _controllerProtocol + "://" + _controllerHost + ":" + _controllerPort + "/cluster/configs";
-    List<Header> headers = makeAuthHeaders(makeAuthToken(_authToken, _user, _password), _authTokenUrl);
+    List<Header> headers = makeAuthHeaders(makeAuthProvider(_authProvider, _authTokenUrl, _authToken, _user,
+        _password));
     switch (_operation.toUpperCase()) {
       case "ADD":
       case "UPDATE":
