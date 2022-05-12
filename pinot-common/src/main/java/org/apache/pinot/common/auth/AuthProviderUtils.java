@@ -48,6 +48,9 @@ public final class AuthProviderUtils {
    * @return auth config
    */
   public static AuthConfig extractAuthConfig(PinotConfiguration pinotConfig, String namespace) {
+    if (namespace == null) {
+      return new AuthConfig(pinotConfig.toMap());
+    }
     return new AuthConfig(pinotConfig.subset(namespace).toMap());
   }
 
@@ -60,7 +63,7 @@ public final class AuthProviderUtils {
    * @return auth provider
    */
   public static AuthProvider extractAuthProvider(PinotConfiguration pinotConfig, String namespace) {
-    return makeDynamicProvider(extractAuthConfig(pinotConfig, namespace));
+    return makeAuthProvider(extractAuthConfig(pinotConfig, namespace));
   }
 
   /**
@@ -69,7 +72,7 @@ public final class AuthProviderUtils {
    * @param authToken static auth token
    * @return auth provider
    */
-  public static AuthProvider makeStaticProvider(String authToken) {
+  public static AuthProvider makeAuthProvider(String authToken) {
     if (StringUtils.isBlank(authToken)) {
       return new NullAuthProvider();
     }
@@ -83,7 +86,7 @@ public final class AuthProviderUtils {
    * @param authConfig auth config
    * @return auth provider
    */
-  public static AuthProvider makeDynamicProvider(AuthConfig authConfig) {
+  public static AuthProvider makeAuthProvider(AuthConfig authConfig) {
     if (authConfig == null) {
       return new NullAuthProvider();
     }

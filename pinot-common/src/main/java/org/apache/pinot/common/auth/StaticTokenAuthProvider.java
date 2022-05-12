@@ -32,37 +32,37 @@ public class StaticTokenAuthProvider implements AuthProvider {
   public static final String PREFIX = "prefix";
   public static final String TOKEN = "token";
 
-  protected final String _header;
-  protected final String _prefix;
-  protected final String _token;
+  protected final String _taskToken;
+  protected final Map<String, Object> _requestHeaders;
 
   public StaticTokenAuthProvider(String token) {
-    _header = HttpHeaders.AUTHORIZATION;
-    _prefix = "";
-    _token = token;
+    _taskToken = token;
+    _requestHeaders = Collections.singletonMap(HttpHeaders.AUTHORIZATION, token);
   }
 
   public StaticTokenAuthProvider(AuthConfig authConfig) {
-    _header = AuthProviderUtils.getOrDefault(authConfig, HEADER, HttpHeaders.AUTHORIZATION);
-    _prefix = AuthProviderUtils.getOrDefault(authConfig, PREFIX, "Basic");
-    _token = authConfig.getProperties().get(TOKEN).toString();
+    String header = AuthProviderUtils.getOrDefault(authConfig, HEADER, HttpHeaders.AUTHORIZATION);
+    String prefix = AuthProviderUtils.getOrDefault(authConfig, PREFIX, "Basic");
+    String userToken = authConfig.getProperties().get(TOKEN).toString();
+
+    _taskToken = makeToken(prefix, userToken);
+    _requestHeaders = Collections.singletonMap(header, _taskToken);
   }
 
   @Override
   public Map<String, Object> getRequestHeaders() {
-    return Collections.singletonMap(_header, makeToken());
+    return _requestHeaders;
   }
 
   @Override
   public String getTaskToken() {
-    return makeToken();
+    return _taskToken;
   }
 
-  private String makeToken() {
-    String token = _token;
-    if (token.startsWith(_prefix)) {
+  private static String makeToken(String prefix, String token) {
+    if (token.startsWith(prefix)) {
       return token;
     }
-    return _prefix + " " + _token;
+    return prefix + " " + token;
   }
 }

@@ -36,6 +36,7 @@ public class TableDataManagerConfig {
   private static final String TABLE_DATA_MANAGER_CONSUMER_DIRECTORY = "consumerDirectory";
   private static final String TABLE_DATA_MANAGER_NAME = "name";
   private static final String TABLE_IS_DIMENSION = "isDimTable";
+  private static final String TABLE_DATA_MANAGER_AUTH = "auth";
 
   private final Configuration _tableDataManagerConfig;
 
@@ -67,6 +68,10 @@ public class TableDataManagerConfig {
     return _tableDataManagerConfig.getBoolean(TABLE_IS_DIMENSION);
   }
 
+  public Configuration getAuthConfig() {
+    return _tableDataManagerConfig.subset(TABLE_DATA_MANAGER_AUTH);
+  }
+
   public static TableDataManagerConfig getDefaultHelixTableDataManagerConfig(
       InstanceDataManagerConfig instanceDataManagerConfig, String tableNameWithType) {
     Configuration defaultConfig = new PropertiesConfiguration();
@@ -77,6 +82,9 @@ public class TableDataManagerConfig {
     TableType tableType = TableNameBuilder.getTableTypeFromTableName(tableNameWithType);
     Preconditions.checkNotNull(tableType);
     defaultConfig.addProperty(TABLE_DATA_MANAGER_TYPE, tableType.name());
+
+    // copy auth-related configs
+    instanceDataManagerConfig.getConfig().subset(TABLE_DATA_MANAGER_AUTH).toMap().forEach(defaultConfig::setProperty);
 
     return new TableDataManagerConfig(defaultConfig);
   }

@@ -146,7 +146,7 @@ public class AbstractBaseAdminCommand extends AbstractBaseCommand {
    * @param authToken optional pass-thru token
    * @param user optional username
    * @param password optional password
-   * @return auth token, or null if neither pass-thru token nor user info available
+   * @return auth provider, or NullauthProvider if neither pass-thru token nor user info available
    */
   @Nullable
   static AuthProvider makeAuthProvider(AuthProvider provider, String tokenUrl, String authToken, String user,

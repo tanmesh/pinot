@@ -107,7 +107,7 @@ public class SegmentPushUtils implements Serializable {
       String fileName = tarFile.getName();
       Preconditions.checkArgument(fileName.endsWith(Constants.TAR_GZ_FILE_EXT));
       String segmentName = fileName.substring(0, fileName.length() - Constants.TAR_GZ_FILE_EXT.length());
-      AuthProvider authProvider = AuthProviderUtils.makeStaticProvider(spec.getAuthToken());
+      AuthProvider authProvider = AuthProviderUtils.makeAuthProvider(spec.getAuthToken());
       for (PinotClusterSpec pinotClusterSpec : spec.getPinotClusterSpecs()) {
         URI controllerURI;
         try {
@@ -165,7 +165,7 @@ public class SegmentPushUtils implements Serializable {
     for (String segmentUri : segmentUris) {
       URI segmentURI = URI.create(segmentUri);
       PinotFS outputDirFS = PinotFSFactory.create(segmentURI.getScheme());
-      AuthProvider authProvider = AuthProviderUtils.makeStaticProvider(spec.getAuthToken());
+      AuthProvider authProvider = AuthProviderUtils.makeAuthProvider(spec.getAuthToken());
       for (PinotClusterSpec pinotClusterSpec : spec.getPinotClusterSpecs()) {
         URI controllerURI;
         try {
@@ -240,7 +240,7 @@ public class SegmentPushUtils implements Serializable {
       Preconditions.checkArgument(fileName.endsWith(Constants.TAR_GZ_FILE_EXT));
       String segmentName = fileName.substring(0, fileName.length() - Constants.TAR_GZ_FILE_EXT.length());
       File segmentMetadataFile = generateSegmentMetadataFile(fileSystem, URI.create(tarFilePath));
-      AuthProvider authProvider = AuthProviderUtils.makeStaticProvider(spec.getAuthToken());
+      AuthProvider authProvider = AuthProviderUtils.makeAuthProvider(spec.getAuthToken());
       try {
         for (PinotClusterSpec pinotClusterSpec : spec.getPinotClusterSpecs()) {
           URI controllerURI;
