@@ -84,7 +84,8 @@ public class TableDataManagerConfig {
     defaultConfig.addProperty(TABLE_DATA_MANAGER_TYPE, tableType.name());
 
     // copy auth-related configs
-    instanceDataManagerConfig.getConfig().subset(TABLE_DATA_MANAGER_AUTH).toMap().forEach(defaultConfig::setProperty);
+    instanceDataManagerConfig.getConfig().subset(TABLE_DATA_MANAGER_AUTH).toMap()
+        .forEach((key, value) -> defaultConfig.setProperty(TABLE_DATA_MANAGER_AUTH + "." + key, value));
 
     return new TableDataManagerConfig(defaultConfig);
   }
